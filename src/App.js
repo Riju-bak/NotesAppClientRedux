@@ -6,6 +6,7 @@ import loginService from "./services/login";
 import LoginForm from "./components/LoginForm";
 import Togglable from "./components/Togglable";
 import NoteForm from "./components/NoteForm";
+import {createNoteAction, toggleImportanceAction} from "./reducers/notesReducer";
 
 const App = (props) => {
     let noteStore = props.noteStore;
@@ -29,11 +30,7 @@ const App = (props) => {
         promise.then(initialNotes => {
             // console.log(`promise fulfilled`);
             // setNotes(initialNotes);
-            noteStore.dispatch(
-                {
-                    type: 'NEW_NOTE',
-                    data: initialNotes
-                });
+            noteStore.dispatch(createNoteAction(initialNotes));
         })
     };
     useEffect(hook, []); //By default effects run after every completed render.
@@ -53,11 +50,7 @@ const App = (props) => {
         noteService.create(noteObject)
             .then(returnedNote => {
                 // setNotes(notes.concat(returnedNote));
-                noteStore.dispatch(
-                    {
-                        type: 'NEW_NOTE',
-                        data: returnedNote
-                    });
+                noteStore.dispatch(createNoteAction(returnedNote));
             })
             .catch(error => {
                 setErrorMessage(error.response.data.error);
@@ -70,11 +63,7 @@ const App = (props) => {
     const toggleImportanceOf = (id) => {
         // Update USING POST Request, not as good as PATCH IMO
         // const note = notes.find(note => note.id === id);
-        noteStore.dispatch(
-            {
-                type: 'TOGGLE_IMPORTANCE',
-                data: {id: id}
-            });
+        noteStore.dispatch(toggleImportanceAction(id));
         const changedNote = noteStore.getState().find(note => note.id === id);
         noteService.update(id, changedNote)
             .then(returnedNote => {
