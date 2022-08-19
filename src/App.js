@@ -7,9 +7,18 @@ import LoginForm from "./components/LoginForm";
 import Togglable from "./components/Togglable";
 import NoteForm from "./components/NoteForm";
 import {createNoteAction, toggleImportanceAction} from "./reducers/notesReducer";
+import {useDispatch, useSelector} from "react-redux";
 
-const App = (props) => {
-    let noteStore = props.noteStore;
+const App = () => {
+    console.log("App rendered!");
+    // The useDispatch-hook provides any React component access to the dispatch-function of the redux-store defined in index.js.
+    // This allows all components to make changes to the state of the redux-store.
+    const dispatch = useDispatch();
+
+    // The component can access the notes stored in the store with the useSelector-hook of the react-redux library.
+    //TODO: Figure out how to work with multiple reducers/stores
+    const notes = useSelector(state => state);
+    console.log("Get the notes from store");
 
     const [showAll, setShowAll] = useState(true);
     const [errorMessage, setErrorMessage] = useState(null);
@@ -22,21 +31,25 @@ const App = (props) => {
     // Togglable will be used in the NoteForm instance
     const noteFormRef = useRef();
 
-    const notesToShow = showAll ? noteStore.getState() : noteStore.getState().filter(note => note.important);
+    const notesToShow = showAll ? notes : notes.filter(note => note.important);
+
 
     const hook = () => {
-        // console.log(`effect`);
+        console.log("setup initial notes on mount");
         const promise = noteService.getAll();
         promise.then(initialNotes => {
-            // console.log(`promise fulfilled`);
-            // setNotes(initialNotes);
-            noteStore.dispatch(createNoteAction(initialNotes));
-        })
+            // NOTE: calling dispatch(action) will cause a re-render
+            dispatch(createNoteAction(initialNotes));
+        });
     };
-    useEffect(hook, []); //By default effects run after every completed render.
-    // // console.log(`render ${notes.length} notes`);
+
+    //By default effects run after every completed render. But since we passed deps [],
+    // this is the same as run hook only onMount.
+    // Since [] never changes.
+    useEffect(hook, [dispatch]);
 
     useEffect(() => {
+        console.log("Setup user token on mount");
         const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser');
         if (loggedUserJSON) {
             const user = JSON.parse(loggedUserJSON);
@@ -50,7 +63,7 @@ const App = (props) => {
         noteService.create(noteObject)
             .then(returnedNote => {
                 // setNotes(notes.concat(returnedNote));
-                noteStore.dispatch(createNoteAction(returnedNote));
+                dispatch(createNoteAction(returnedNote));
             })
             .catch(error => {
                 setErrorMessage(error.response.data.error);
@@ -63,8 +76,8 @@ const App = (props) => {
     const toggleImportanceOf = (id) => {
         // Update USING POST Request, not as good as PATCH IMO
         // const note = notes.find(note => note.id === id);
-        noteStore.dispatch(toggleImportanceAction(id));
-        const changedNote = noteStore.getState().find(note => note.id === id);
+        dispatch(toggleImportanceAction(id));
+        const changedNote = notes.find(note => note.id === id);
         noteService.update(id, changedNote)
             .then(returnedNote => {
                 console.log(`note ${id} importance set to ${returnedNote.important}`);
@@ -156,6 +169,6 @@ const App = (props) => {
                 </div>
             }
         </>);
-}
+};
 
 export default App;

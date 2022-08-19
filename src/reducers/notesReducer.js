@@ -14,6 +14,7 @@ const notesReducer = (state = [], action) => {
     }
 }
 
+//Functions that create actions are called action-creators
 export const createNoteAction = (note) => {
     return {
         type: 'NEW_NOTE',
