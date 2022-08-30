@@ -1,32 +1,30 @@
-const notesReducer = (state = [], action) => {
-    switch (action.type) {
-        case 'NEW_NOTE':
-            return state.concat(action.data);
-        case 'TOGGLE_IMPORTANCE':
-            const id = action.data.id;
-            const noteToChange = state.find(n => n.id === id);
-            const changedNote = {...noteToChange, important: !noteToChange.important};
-            return state.map(note => (note.id === changedNote.id) ? changedNote : note);
-        case 'GET_NOTE':
-            break;
-        default:
-            return state;
+import {createSlice} from "@reduxjs/toolkit";
+
+const notesSlice = createSlice({
+    name: 'notes',
+    initialState: [],
+    reducers: {
+        createNote(state, action){
+            return state.concat(action.payload) //We send a single note or a list of notes as payload
+        },
+        toggleImportance(state, action){
+            const id = action.payload; //we pass the note id as the payload
+            const noteToChange = state.find(n => n.id === id)
+            const changedNote = {...noteToChange, important: !noteToChange.important}
+            return state.map(n => n.id === id ? changedNote : n)
+        }
     }
-}
+})
 
-//Functions that create actions are called action-creators
-export const createNoteAction = (note) => {
-    return {
-        type: 'NEW_NOTE',
-        data: note
-    };
-}
+//Now dispatch(createNote(someNoteObj))
+//will be the same as
+// dispatch( {type: 'notes/createNote', payload: someNoteObj} )
 
-export const toggleImportanceAction = (id) => {
-    return{
-        type: 'TOGGLE_IMPORTANCE',
-        data: {id : id}
-    };
-}
+// and
 
-export default notesReducer;
+// dispatch(toggleImportance(id))
+// will be same as
+// dispatch({type: 'notes/toggleImportance', payload: id})
+
+export const {createNote, toggleImportance} = notesSlice.actions
+export default notesSlice.reducer

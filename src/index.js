@@ -34,12 +34,19 @@ import "./index.css";
 
 
 import App from './App'
-
-import { createStore } from 'redux'
-import { Provider } from 'react-redux'
+import {Provider} from 'react-redux'
 import notesReducer from './reducers/notesReducer'
+import {configureStore} from "@reduxjs/toolkit";
+import filterReducer from "./reducers/filterReducer";
 
-const store = createStore(notesReducer)
+// Instead of Redux's createStore function, let's create the store using Redux Toolkit's configureStore function
+//This is how you can work with multiple reducers.
+const store = configureStore({
+    reducer: {
+        notes: notesReducer,
+        filter: filterReducer
+    }
+})
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     // The <Provider> component makes the Redux store available to any

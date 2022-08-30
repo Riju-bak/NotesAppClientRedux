@@ -6,7 +6,7 @@ import loginService from "./services/login";
 import LoginForm from "./components/LoginForm";
 import Togglable from "./components/Togglable";
 import NoteForm from "./components/NoteForm";
-import {createNoteAction, toggleImportanceAction} from "./reducers/notesReducer";
+import {createNote, toggleImportance} from "./reducers/notesReducer";
 import {useDispatch, useSelector} from "react-redux";
 
 const App = () => {
@@ -17,8 +17,8 @@ const App = () => {
 
     // The component can access the notes stored in the store with the useSelector-hook of the react-redux library.
     //TODO: Figure out how to work with multiple reducers/stores
-    const notes = useSelector(state => state);
-    console.log("Get the notes from store");
+    const notes = useSelector(state => state.notes);
+    console.log("Get the notes from store - now using reduxjs/toolkit :)");
 
     const [showAll, setShowAll] = useState(true);
     const [errorMessage, setErrorMessage] = useState(null);
@@ -39,7 +39,8 @@ const App = () => {
         const promise = noteService.getAll();
         promise.then(initialNotes => {
             // NOTE: calling dispatch(action) will cause a re-render
-            dispatch(createNoteAction(initialNotes));
+            dispatch(createNote(initialNotes));
+            // same as dispatch( {type: 'notes/createNote', payload: initialNotes} )
         });
     };
 
@@ -63,7 +64,7 @@ const App = () => {
         noteService.create(noteObject)
             .then(returnedNote => {
                 // setNotes(notes.concat(returnedNote));
-                dispatch(createNoteAction(returnedNote));
+                dispatch(createNote(returnedNote));
             })
             .catch(error => {
                 setErrorMessage(error.response.data.error);
@@ -76,7 +77,7 @@ const App = () => {
     const toggleImportanceOf = (id) => {
         // Update USING POST Request, not as good as PATCH IMO
         // const note = notes.find(note => note.id === id);
-        dispatch(toggleImportanceAction(id));
+        dispatch(toggleImportance(id));     //same as dispatch({type: 'notes/toggleImportance', payload: id})
         const changedNote = notes.find(note => note.id === id);
         noteService.update(id, changedNote)
             .then(returnedNote => {
